@@ -1,0 +1,236 @@
+---
+title: MockServer
+layout: default
+---
+
+<div class="header">
+	<h1>MockServer</h1>
+
+	<h2 itemprop="headline">Easy mocking of any system you integrate with via HTTP or HTTPS</h2>
+</div>
+
+<a href="https://github.com/mock-server/mockserver" target="_blank"><img style="position: absolute; top: 0; right: 0; border: 0;" width="149" height="149" src="images/forkme_right_red.png" alt="Fork us on GitHub"></a>
+
+
+<a id="what-is-mockserver" class="anchor" href="#what-is-mockserver">&nbsp;</a>
+
+<div class="build_tag">
+	<a href="https://trello.com/b/dsfTCP46/mockserver" target="_blank"><img width="47px" src="images/trello_badge.png" alt="Trello Backlog"></a>&nbsp;
+	<a href="https://join-mock-server-slack.herokuapp.com" target="_blank"><img width="66px" src="images/slack-logo-slim.png" alt="Join Slack"></a>&nbsp;
+	<a href="https://buildkite.com/mockserver/mockserver" target="_blank"><img src="https://badge.buildkite.com/3b6803f4fe98cb5ed7bf18292a1434f800b53d8fecb92811d8.svg?style=square&theme=slack&branch=master" alt="BuildKite Build Status"></a>
+</div>
+
+<a id="what_is_mockserver" class="anchor" href="#what_is_mockserver">&nbsp;</a>
+
+<h2>What is MockServer</h2>
+
+<p>For any system you integrate with via HTTP or HTTPS MockServer can be used as:</p>
+
+<ul>
+	<li>a <a href="/mock_server/getting_started.html">mock</a> configured to return specific responses for different requests</li>
+	<li>a <a href="/proxy/getting_started.html">proxy</a> recording and optionally modifying requests and responses</li>
+	<li>both a <a href="/proxy/getting_started.html">proxy</a> for some requests and a <a href="/mock_server/getting_started.html">mock</a> for other requests at the same time</li>
+</ul>
+
+<p>When MockServer receives a request it matches the request against active <strong>expectations</strong> that have been configured, if no matches are found it proxies the request if appropriate otherwise a 404 is returned.</p>
+
+<p>For each request received the following steps happen:</p>
+
+<ol>
+	<li>find matching expectation and perform action</li>
+	<li>if no matching expectation proxy request</li>
+	<li>if not a proxy request return 404</li>
+</ol>
+
+<p>An <strong>expectation</strong> defines the <strong>action</strong> that is taken, for example, a response could be returned.</p>
+
+<p>MockServer supports the follow <strong>actions</strong>:</p>
+<ul>
+	<li>
+        <strong>return a "mock" <a href="/mock_server/creating_expectations.html#mock_response">response</a></strong> when a request matches an <a href="/mock_server/creating_expectations.html">expectation</a>
+        <p><img class="action_image" src="images/expectation_response_action.png" alt="Response Action Expectation"></p>
+    </li>
+	<li>
+        <strong><a href="/mock_server/creating_expectations.html#mock_forward">forward</a> a request</strong> when the request matches an <a href="/mock_server/creating_expectations.html">expectation</a> (i.e. a dynamic port forwarding proxy)
+        <p><img class="action_image" src="images/expectation_forward_action.png" alt="Forward Action Expectation"></p>
+    </li>
+	<li>
+        <strong>execute a <a href="/mock_server/creating_expectations.html#callback">callback</a></strong> when a request matches an <a href="/mock_server/creating_expectations.html">expectation</a>, allowing the response to be created dynamically
+        <p><img class="action_image" src="images/expectation_callback_action.png" alt="Callback Action Expectation"></p>
+    </li>
+
+    <li>
+        <strong>return an <a href="/mock_server/creating_expectations.html#mock_error">invalid response</a></strong> or close the connection when a request matches an <a href="/mock_server/creating_expectations.html">expectation</a>
+        <p><img class="action_image" src="images/expectation_error_action.png" alt="Error Action Expectation"></p>
+    </li>
+	<li>
+        <strong><a href="/mock_server/verification.html">verify</a> requests</strong> have been sent (i.e. as a test assertion)
+        <p><img class="action_image" src="images/verification.png" alt="Verification"></p>
+    </li>
+    <li>
+        <strong><a href="/mock_server/verification.html">retrieve</a> logs</strong>, <strong>requests</strong> or <strong>expectations</strong> to help debug
+        <p><img class="action_image" src="images/retrieve_logs.png" alt="Retrieve Logs"></p>
+    </li>
+</ul>
+
+<a id="proxying_with_mockserver" class="anchor" href="#proxying_with_mockserver">&nbsp;</a>
+
+<h2>Proxying with MockServer</h2>
+
+<p>MockServer can:</p>
+<ul>
+	<li><strong><a href="/proxy/getting_started.html">proxy</a> all requests</strong> using any of the following proxying methods:
+		<ul class="sublist">
+			<li>Port Forwarding</li>
+			<li>Web Proxying (i.e. HTTP proxy)</li>
+			<li>HTTPS Tunneling Proxying (using HTTP CONNECT)</li>
+			<li>SOCKS Proxying (i.e. dynamic port forwarding)</li>
+		</ul>
+	</li>
+	<li><strong><a href="/proxy/verification.html">verify</a> proxied requests</strong> have been sent (i.e. in a test assertion)</li>
+	<li><strong><a href="/proxy/record_and_replay.html">record</a> proxied requests and responses</strong> to analyse how a system behaves</li>
+</ul>
+
+<p>MockServer supports the following proxying techniques:</p>
+
+<ul>
+	<li><strong>Port Forwarding</strong>
+		<ul>
+			<li>all requests are forwarded to a single hostname or IP and port</li>
+			<li>to proxy requests the <strong>HTTP client</strong> should <a href="/proxy/configuring_sut.html">use the hostname and port of MockServer</a></li>
+		</ul>
+	</li>
+	<li><strong>Web Proxying</strong> (i.e. HTTP proxy)
+		<ul>
+			<li>each request is forwarded dynamically using its Host header</li>
+			<li>to proxy requests the <strong>HTTP client</strong> should <a href="/proxy/configuring_sut.html">be configured to use an HTTP Proxy</a></li>
+		</ul>
+	</li>
+	<li><strong>Secure Web Proxying</strong> (i.e. HTTPS tunneling proxying)
+		<ul>
+			<li>requests are forwarded using a CONNECT request that setups an HTTP tunnel</li>
+			<li>an SSL certificate is auto-generated allowing encrypted HTTPS traffic to be recorded transparently</li>
+			<li>to proxy requests the <strong>HTTP client</strong> should <a href="/proxy/configuring_sut.html">be configured to use an HTTP Proxy</a></li>
+		</ul>
+	</li>
+	<li><strong>SOCKS Proxying</strong> (i.e. dynamic port forwarding)
+		<ul>
+			<li>requests are forwarded using a SOCK CONNECT CMD request that established a socket tunnel</li>
+			<li>if the traffic is encrypted an SSL certificate is auto-generated allowing SSL traffic to be recorded transparently</li>
+			<li>to proxy requests the <strong>operating system (or JVM)</strong> should <a href="/proxy/configuring_sut.html">be configured to use an HTTP Proxy</a></li>
+		</ul>
+	</li>
+	<li><strong>SSL & Certificates</strong>
+		<ul>
+			<li>all SSL traffic is handled transparently by auto-generating an appropriate SSL certificate</li>
+			<li>generated certificates use a single <a href="https://github.com/mock-server/mockserver/blob/master/mockserver-core/src/main/resources/org/mockserver/socket/CertificateAuthorityCertificate.pem">MockServer root CA certificate</a> enabling the root certificate to be
+				<a href="/mock_server/HTTPS_TLS.html">easily imported</a></li>
+		</ul>
+	</li>
+	<li><strong>Port Unification</strong>
+		<ul>
+			<li>to simplify configuration all protocols (i.e. HTTP, HTTPS / TLS, SOCKS, etc) are supported on the same port</li>
+			<li>the protocol is dynamically detected by both MockServer</li>
+		</ul>
+	</li>
+	<li><strong>Simultaneous Proxying & Mocking</strong>
+		<ul>
+			<li>if MockServer is being used as a proxy <strong>expectations</strong> can also be created</li>
+			<li>when a request is received it is first matched against active <strong>expectations</strong> that have been configured</li>
+			<li>if an <strong>expectations</strong> is matched its <strong>action</strong> will be performed instead of proxying the request</li>
+		</ul>
+	</li>
+</ul>
+
+<a id="why-use-mockserver" class="anchor" href="#why-use-mockserver">&nbsp;</a>
+
+<h2>Why use MockServer</h2>
+
+<p>MockServer allows you to mock any server or service via HTTP or HTTPS, such as a REST or RPC service. </p>
+
+<p>This is useful in the following scenarios:</p>
+
+<ul>
+	<li>testing
+		<ul>
+			<li>easily recreate all types of responses for HTTP dependencies such as REST or RPC services to test applications easily and affectively</li>
+			<li>isolate the system-under-test to ensure tests run reliably and only fail when there is a genuine bug. It is important only the system-under-test is tested and not its dependencies to avoid tests failing due to irrelevant external changes such as network failure or a server being rebooted / redeployed.</li>
+			<li>easily setup mock responses independently for each test to ensure test data is encapsulated with each test. Avoid sharing data between tests that is difficult to manage and maintain and risks tests infecting each other</li>
+			<li>create test assertions that verify the requests the system-under-test has sent</li>
+		</ul>
+	</li>
+	<li>de-coupling development
+		<ul>
+			<li>start working against a service API before the service is available. If an API or service is not yet fully developed MockServer can mock the API allowing any team who is using the service to start work without being delayed</li>
+			<li>isolate development teams during the initial development phases when the APIs / services may be extremely unstable and volatile. Using MockServer allows development work to continue even when an external service fails</li>
+		</ul>
+	</li>
+	<li>isolate single service
+		<ul>
+			<li>during deployment and debugging it is helpful to run a single application or service or handle a sub-set of requests on on a local machine in debug mode. Using MockServer it is easy to <a href="/mock_server/isolating_single_service.html">selectively forward requests to a local process</a> running in debug mode, all other request can be forwarded to the real services for example running in a QA or UAT environment</li>
+		</ul>
+	</li>
+</ul>
+
+<p><strong>Mocking Dependencies & Verifying Request</strong></p>
+
+<p>Given a system with service dependencies, as follows:</p>
+
+<p><img src="images/system_in_production.png" alt="System In Production" style="max-width:100%;"></p>
+
+<p>MockServer could be used to mock the service dependencies, as follows:</p>
+
+<p><img itemprop="image" src="images/system_under_test_with_mockserver.png" alt="Mocking service dependencies with MockServer" style="max-width:100%;"></p>
+
+<p><strong>Isolating Single Service / Application</strong></p>
+
+<p>A single page application may load static resources such as HTML, CSS and JavaScript from a web server and also make AJAX calls to one or more separate services, as follows:</p>
+
+<p><img src="images/single_page_application.png" alt="Single Page Application" style="max-width:100%;"></p>
+
+<p>To isolate a single AJAX service, for development or debugging, the MockServer can selectively forward specific requests to local instance of the service:</p>
+
+<p><img src="images/isolate_single_service_with_mockserver.png" alt="Isolating Single Service" style="max-width:100%;"></p>
+
+<p>Using MockServer as a content routing load balancer is described in more detail in the section called <a href="/mock_server/isolating_single_service.html">Isolate Single Service</a>.</p>
+
+<h2>Why use MockServer as a proxy</h2>
+
+<p>MockServer allows you to record request from the system-under-test or two analysis an existing system by recording outbound requests.</p>
+
+<p>This is useful in the following scenarios:</p>
+
+<ul>
+	<li>testing
+		<ul>
+			<li>create test assertions that verify the requests the system-under-test has been sent, without needing to mock any requests</li>
+		</ul>
+	</li>
+	<li>analyse existing system
+		<ul>
+			<li>record all outbound requests so it is possible to analise and under stand what outbound requests an existing system is making</li>
+		</ul>
+	</li>
+	<li>debug HTTP interactions
+		<ul>
+			<li>log all outbound requests so it is possible to visualise all interactions (for example from a browser) to external services. This is particularly important as network analysis tools in browsers such as Chrome do not accurately show all network interactions, such as, favicon.ico requests.  In addition, many proxies do not handle encrypted HTTPS traffic, however, MockServer auto-generates certificates using a single <a href="https://github.com/mock-server/mockserver/blob/master/mockserver-core/src/main/resources/org/mockserver/socket/CertificateAuthorityCertificate.pem">MockServer root CA certificate</a> enabling the root certificate to be <a href="/mock_server/HTTPS_TLS.html">easily imported</a></li>
+		</ul>
+	</li>
+	<li>record & replay
+		<ul>
+			<li>all recorded requests can be converted into Java code or JSON expectations to simplify the creation of mocks for complex test scenarios</li>
+		</ul>
+	</li>
+</ul>
+
+<p><strong>Recording Requests & Analysing Behaviour</strong></p>
+
+<p>MockServer can record all proxied requests, as follows:</p>
+
+<p><img src="images/recording_requests_with_mockserver_proxy.png" alt="Recording service requests with MockServer Proxy" style="max-width:100%;"></p>
+
+<p><strong>Verifying Request</strong></p>
+
+<p>MockServer can verify proxied service requests, as follows:</p>
+
+<p><img src="images/system_under_test_with_mockserver_proxy.png" alt="Verifying service requests with MockServer Proxy" style="max-width:100%;"></p>

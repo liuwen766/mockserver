@@ -1,0 +1,73 @@
+---
+title: Running Tests In Parallel
+layout: page
+pageOrder: 7
+section: 'Mock Server'
+subsection: true
+sitemap:
+  priority: 0.7
+  changefreq: 'monthly'
+  lastmod: 2019-11-10T08:00:00+01:00
+---
+
+<p>To ensure all tests can run in parallel with completely isolated independent data use a unique value for each test. The unique value for a test should be specified in each request matcher for all expectations for that test.  This ensures that expectations created by one test are not visible by other tests and therefore keeps test isolated without needing multiple separate instances of MockServer.</p>
+
+<p>For example, if each test generates a unique value (i.e. a UUID) for the sessionId cookie or a correlationId header then this header or cookie can be specified in each expectation's request matcher ensuring only requests with that unique value could be matched against expectations with that unique value.</p>
+
+<p><strong>Note:</strong> the drawback with this approach is that the logs will be more complex to understand because there will be a large number of expectation match failures, therefore it is recommended to either use a unique instance of MockServer per test or to run tests in series and clear all expectations prior to each test.</p>
+
+<p><strong>Java</strong></p>
+
+<pre class="prettyprint lang-java code"><code class="code">String sessionId = UUID.randomUUID().toString();
+
+new MockServerClient("127.0.0.1", 1080)
+    .when(
+        request()
+            .withMethod("GET")
+            .withPath("/somePath")
+            .withCookies(
+                cookie("sessionId", sessionId)
+            )
+    )
+    .respond(
+        response()
+            .withStatusCode(200)
+            .withBody("{ name: 'value' }")
+    );</code></pre>
+
+<p><strong>JavaScript</strong></p>
+
+<pre class="prettyprint lang-javascript code"><code class="code">function guid() {
+    function s4() {
+        return Math.floor((1 + Math.random()) * 0x10000)
+            .toString(16)
+            .substring(1);
+    }
+    return s4() + s4() + '-' + s4() + '-' + s4() + '-' +
+        s4() + '-' + s4() + s4() + s4();
+}
+
+var sessionId = guid();
+
+mockServerClient("localhost", 1080)
+    .mockAnyResponse({
+        'httpRequest': {
+            'method': 'GET',
+            'path': '/somePath',
+            "cookies": {
+                "sessionId": sessionId
+            }
+        },
+        'httpResponse': {
+            'statusCode': 200,
+            'body': JSON.stringify({name: 'value'})
+        }
+    })
+    .then(
+        function () {
+            console.log("expectation created");
+        },
+        function (error) {
+            console.log(error);
+        }
+    );</code></pre>

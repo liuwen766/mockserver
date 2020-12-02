@@ -1,0 +1,35 @@
+{
+  "title": "verification sequence",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "expectationIds": {
+      "type": "array",
+      "additionalProperties": false,
+      "items": {
+        "$ref": "#/definitions/expectationId"
+      }
+    },
+    "httpRequests": {
+      "type": "array",
+      "additionalProperties": false,
+      "items": {
+        "$ref": "#/definitions/requestDefinition"
+      }
+    }
+  },
+  "oneOf": [
+    {
+      "required": [
+        "expectationIds"
+      ]
+    },
+    {
+      "required": [
+        "httpRequests"
+      ]
+    }
+  ],
+  "definitions": {
+  }
+}
